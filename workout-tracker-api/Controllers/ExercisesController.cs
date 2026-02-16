@@ -38,4 +38,21 @@ public class ExercisesController : ControllerBase
         var exerciseDto = _mapper.Map<ExerciseDto>(exercise);
         return Ok(exerciseDto);
     }
+
+    [HttpPost]
+    public async Task<ActionResult<ExerciseDto>> CreateExercise([FromBody] CreateExerciseDto exerciseDto, CancellationToken cancellationToken)
+    {
+        var exercise = _mapper.Map<Exercise>(exerciseDto);
+
+        await _exercises.AddAsync(exercise, cancellationToken);
+        await _exercises.SaveChangesAsync(cancellationToken);
+        
+        var result= _mapper.Map<ExerciseDto>(exercise);
+        return CreatedAtAction
+            (
+                nameof(GetExercises),
+                new { id = exercise.Id},
+                result
+            );
+    }
 }

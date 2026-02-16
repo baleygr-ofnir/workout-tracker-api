@@ -22,5 +22,17 @@ public class WorkoutContext : DbContext
             .WithOne(w => w.Workout)
             .HasForeignKey(e => e.WorkoutId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WorkoutExercise>()
+            .HasOne(w => w.Workout)
+            .WithMany()
+            .HasForeignKey(w => w.WorkoutId);
+
+        modelBuilder.Entity<Exercise>().HasData(new Exercise
+        {
+            Id = ExerciseSeed.PushUpId,
+            Name = "Push Up",
+            Description = "Bodyweight Push Up",
+        });
     }
 }
