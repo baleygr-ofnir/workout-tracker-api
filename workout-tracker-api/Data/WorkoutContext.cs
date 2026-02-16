@@ -5,8 +5,9 @@ namespace workout_tracker_api.Data;
 
 public class WorkoutContext : DbContext
 {
+    public DbSet<Exercise> Exercises => Set<Exercise>(); 
     public DbSet<Workout> Workouts => Set<Workout>();
-    public DbSet<Exercise> Exercises => Set<Exercise>();
+    public DbSet<WorkoutExercise> WorkoutExercises => Set<WorkoutExercise>();
     
     public WorkoutContext(DbContextOptions<WorkoutContext> options) : base(options)
     {
@@ -17,8 +18,8 @@ public class WorkoutContext : DbContext
         base.OnModelCreating(modelBuilder);
         
         modelBuilder.Entity<Workout>()
-            .HasMany(w => w.Exercises)
-            .WithOne(e => e.Workout)
+            .HasMany(w => w.WorkoutExercises)
+            .WithOne(w => w.Workout)
             .HasForeignKey(e => e.WorkoutId)
             .OnDelete(DeleteBehavior.Cascade);
     }

@@ -21,6 +21,7 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
     public async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate,
         CancellationToken cancellationToken = default) => await DbSet.Where(predicate).AsNoTracking().ToListAsync(cancellationToken);
 
+    public IQueryable<T> AsQueryable() => DbSet.AsQueryable();
     public virtual async Task AddAsync(T entity, CancellationToken cancellationToken = default) => await DbSet.AddAsync(entity, cancellationToken).AsTask();
     
     public virtual void Update(T entity) => DbSet.Update(entity);

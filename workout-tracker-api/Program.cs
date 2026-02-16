@@ -22,8 +22,9 @@ public class Program
             options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
         );
         // DI for repositories
-        builder.Services.AddScoped<IRepository<Workout>, WorkoutRepository>();
         builder.Services.AddScoped<IRepository<Exercise>, ExerciseRepository>();
+        builder.Services.AddScoped<IRepository<Workout>, WorkoutRepository>();
+        builder.Services.AddScoped<IRepository<WorkoutExercise>, WorkoutExerciseRepository>();
         // Automapping DTOs
         builder.Services.AddAutoMapper
         (

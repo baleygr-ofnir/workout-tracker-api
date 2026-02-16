@@ -2,6 +2,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Operations;
+using Microsoft.EntityFrameworkCore;
+using workout_tracker_api.Contracts.WorkoutExercises;
 using workout_tracker_api.Contracts.Workouts;
 using workout_tracker_api.Data.Entities;
 using workout_tracker_api.Data.Repositories;
@@ -13,11 +15,13 @@ namespace workout_tracker_api.Controllers;
 public class WorkoutsController : ControllerBase
 {
     private readonly IRepository<Workout> _workouts;
+    private readonly IRepository<WorkoutExercise> _workoutExercises;
     private readonly IRepository<Exercise> _exercises;
     private readonly IMapper _mapper;
     
-    public WorkoutsController(IRepository<Workout> workouts, IRepository<Exercise> exercises, IMapper mapper) {
+    public WorkoutsController(IRepository<Workout> workouts, IRepository<WorkoutExercise> workoutExercises, IRepository<Exercise> exercises, IMapper mapper) {
         _workouts = workouts;
+        _workoutExercises = workoutExercises;
         _exercises = exercises;
         _mapper = mapper;
     }
@@ -26,7 +30,7 @@ public class WorkoutsController : ControllerBase
     [HttpGet("{workoutId:guid}")]
     public async Task<ActionResult<WorkoutDto>> GetWorkout(Guid workoutId, CancellationToken cancellationToken)
     {
-        var workout = await _workouts.GetAsync(workoutId, cancellationToken);
+        var workout = await _workouts.GetAsync(workoutId, cancellationToken); 
         if (workout == null) return NotFound();
         
         var workoutDto = _mapper.Map<WorkoutDto>(workout);
@@ -55,35 +59,45 @@ public class WorkoutsController : ControllerBase
 
     // GET api/workouts/{workoutId}/exercises
     [HttpGet("{workoutId:guid}/exercises")]
-    public async Task<ActionResult<IEnumerable<ExerciseDto>>> GetExercises(Guid workoutId,
+    public async Task<ActionResult<IEnumerable<WorkoutExerciseDto>>> GetWorkoutExercises(Guid workoutId,
         CancellationToken cancellationToken)
     {
-        var exercises = await _exercises.FindAsync
+        var workoutExercises = await _workoutExercises
+            .FindAsync
             (
-                e => e.WorkoutId == workoutId,
+                we => we.WorkoutId == workoutId,
                 cancellationToken
             );
-        var exerciseDto = _mapper.Map<IEnumerable<ExerciseDto>>(exercises);
+        var workoutExerciseDtos = _mapper.Map<IEnumerable<WorkoutExerciseDto>>(workoutExercises);
         
-        return Ok(exerciseDto);
+        return Ok(workoutExerciseDtos);
     }
 
     // POST api/workouts/{workoutId}/exercises
     [HttpPost("{workoutId:guid}/exercises")]
-    public async Task<ActionResult<ExerciseDto>> AddExercise(Guid workoutId, [FromBody] CreateExerciseDto exerciseDto,
+    public async Task<ActionResult<WorkoutExerciseDto>> AddExercise(Guid workoutId, [FromBody] CreateWorkoutExerciseDto workoutExerciseDto,
         CancellationToken cancellationToken)
     {
-        var exercise = _mapper.Map<Exercise>(exerciseDto);
-        exercise.WorkoutId = workoutId;
-
-        await _exercises.AddAsync(exercise, cancellationToken);
-        await _exercises.SaveChangesAsync(cancellationToken);
+        var workout = await _workouts.GetAsync(workoutId, cancellationToken);
+        if (workout == null) return NotFound();
         
-        var result = _mapper.Map<ExerciseDto>(exercise);
+        var exercise = await _exercises.GetAsync(workoutExerciseDto.ExerciseId, cancellationToken);
+        if (exercise == null) return BadRequest("Exercise does not exist.");
+        
+        var workoutExercise = _mapper.Map<WorkoutExercise>(workoutExerciseDto);
+        workoutExercise.WorkoutId = workoutId;
+        workoutExercise.ExerciseId = workoutExerciseDto.ExerciseId;
+
+        await _workoutExercises.AddAsync(workoutExercise, cancellationToken);
+        await _workoutExercises.SaveChangesAsync(cancellationToken);
+        
+        workoutExercise.Exercise = exercise;
+        
+        var result = _mapper.Map<WorkoutExerciseDto>(workoutExercise);
 
         return CreatedAtAction
             (
-                nameof(GetExercises),
+                nameof(GetWorkoutExercises),
                 new { workoutId },
                 result
             );
