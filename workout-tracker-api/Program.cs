@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using workout_tracker_api.Data;
 using workout_tracker_api.Data.Entities;
 using workout_tracker_api.Data.Repositories;
-using workout_tracker_api.Mapping;
 
 namespace workout_tracker_api;
 
@@ -19,20 +19,13 @@ public class Program
         // DbContext
         builder.Services.AddDbContext<WorkoutContext>
         (
-            options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+            options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
         );
         // DI for repositories
         builder.Services.AddScoped<IRepository<Exercise>, ExerciseRepository>();
         builder.Services.AddScoped<IRepository<Workout>, WorkoutRepository>();
         builder.Services.AddScoped<IRepository<WorkoutExercise>, WorkoutExerciseRepository>();
-        // Automapping DTOs
-        builder.Services.AddAutoMapper
-        (
-            _ =>
-            {
-            },
-            typeof(WorkoutProfile).Assembly
-        );
+        
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 
@@ -42,6 +35,7 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.MapScalarApiReference();
         }
 
         app.UseHttpsRedirection();
