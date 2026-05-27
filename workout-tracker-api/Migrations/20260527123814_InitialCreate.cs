@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace workout_tracker_api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,10 +17,10 @@ namespace workout_tracker_api.Migrations
                 name: "Exercises",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
-                    Category = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    Category = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,10 +31,10 @@ namespace workout_tracker_api.Migrations
                 name: "Workouts",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,12 +45,12 @@ namespace workout_tracker_api.Migrations
                 name: "WorkoutExercises",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    WorkoutId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ExerciseId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Sets = table.Column<int>(type: "integer", nullable: false),
-                    Reps = table.Column<int>(type: "integer", nullable: false),
-                    Weight = table.Column<double>(type: "double precision", nullable: true)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    WorkoutId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ExerciseId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Sets = table.Column<int>(type: "INTEGER", nullable: false),
+                    Reps = table.Column<int>(type: "INTEGER", nullable: false),
+                    Weight = table.Column<double>(type: "REAL", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -65,6 +67,16 @@ namespace workout_tracker_api.Migrations
                         principalTable: "Workouts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Exercises",
+                columns: new[] { "Id", "Category", "Description", "Name" },
+                values: new object[,]
+                {
+                    { new Guid("11111111-1111-1111-1111-111111111111"), 14, "Bodyweight push exercise primarily targeting chest, shoulders, and triceps", "Push Up" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), 12, "Barbell squat targeting quads, glutes, and core.", "Back Squat" },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 13, "Hinge pattern lift targeting posterior chain and grip.", "Deadlift" }
                 });
 
             migrationBuilder.CreateIndex(
