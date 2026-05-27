@@ -19,8 +19,38 @@ public class WorkoutContext : DbContext
         
         modelBuilder.Entity<Workout>()
             .HasMany(w => w.WorkoutExercises)
-            .WithOne(w => w.Workout)
-            .HasForeignKey(e => e.WorkoutId)
+            .WithOne(we => we.Workout)
+            .HasForeignKey(we => we.WorkoutId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WorkoutExercise>()
+            .HasOne(we => we.Exercise)
+            .WithMany()
+            .HasForeignKey(we => we.ExerciseId);
+
+        modelBuilder.Entity<Exercise>().HasData
+        (
+            new Exercise
+            {
+                Id = ExerciseSeed.PushUpId,
+                Name = "Push Up",
+                Description = "Bodyweight push exercise primarily targeting chest, shoulders, and triceps",
+                Category = Category.PushPattern
+            },
+            new Exercise()
+            {
+                Id = ExerciseSeed.SquatId,
+                Name = "Back Squat",
+                Description = "Barbell squat targeting quads, glutes, and core.",
+                Category = Category.SquatPattern
+            },
+            new Exercise()
+            {
+                Id = ExerciseSeed.DeadliftId,
+                Name = "Deadlift",
+                Description = "Hinge pattern lift targeting posterior chain and grip.",
+                Category = Category.HingePattern
+            }
+        );
     }
 }
