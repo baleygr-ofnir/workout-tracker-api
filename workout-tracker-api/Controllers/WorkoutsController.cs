@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Operations;
@@ -7,6 +6,7 @@ using workout_tracker_api.Contracts.WorkoutExercises;
 using workout_tracker_api.Contracts.Workouts;
 using workout_tracker_api.Data.Entities;
 using workout_tracker_api.Data.Repositories;
+using workout_tracker_api.Mapping;
 
 namespace workout_tracker_api.Controllers;
 
@@ -17,13 +17,11 @@ public class WorkoutsController : ControllerBase
     private readonly IRepository<Workout> _workouts;
     private readonly IRepository<WorkoutExercise> _workoutExercises;
     private readonly IRepository<Exercise> _exercises;
-    private readonly IMapper _mapper;
     
-    public WorkoutsController(IRepository<Workout> workouts, IRepository<WorkoutExercise> workoutExercises, IRepository<Exercise> exercises, IMapper mapper) {
+    public WorkoutsController(IRepository<Workout> workouts, IRepository<WorkoutExercise> workoutExercises, IRepository<Exercise> exercises) {
         _workouts = workouts;
         _workoutExercises = workoutExercises;
         _exercises = exercises;
-        _mapper = mapper;
     }
     
     // GET api/workouts/{workoutId}
@@ -33,8 +31,7 @@ public class WorkoutsController : ControllerBase
         var workout = await _workouts.GetAsync(workoutId, cancellationToken); 
         if (workout == null) return NotFound();
         
-        var workoutDto = _mapper.Map<WorkoutDto>(workout);
-        return Ok(workoutDto);
+        return Ok(workout.ToDto());
     }
 
     // POST api/workouts
@@ -42,18 +39,16 @@ public class WorkoutsController : ControllerBase
     public async Task<ActionResult<WorkoutDto>> CreateWorkout([FromBody] CreateWorkoutDto workoutDto,
         CancellationToken cancellationToken)
     {
-        var workout = _mapper.Map<Workout>(workoutDto);
+        var workout = workoutDto.ToEntity();
         
         await _workouts.AddAsync(workout, cancellationToken);
         await _workouts.SaveChangesAsync(cancellationToken);
 
-        var result = _mapper.Map<WorkoutDto>(workout);
-        
         return CreatedAtAction
             (
                 nameof(GetWorkout),
                 new { workoutId = workout.Id },
-                result
+                workout.ToDto()
             );
     }
 
@@ -68,7 +63,7 @@ public class WorkoutsController : ControllerBase
                 we => we.WorkoutId == workoutId,
                 cancellationToken
             );
-        var workoutExerciseDtos = _mapper.Map<IEnumerable<WorkoutExerciseDto>>(workoutExercises);
+        var workoutExerciseDtos = workoutExercises.Select(we => we.ToDto());
         
         return Ok(workoutExerciseDtos);
     }
@@ -84,7 +79,7 @@ public class WorkoutsController : ControllerBase
         var exercise = await _exercises.GetAsync(workoutExerciseDto.ExerciseId, cancellationToken);
         if (exercise == null) return BadRequest("Exercise does not exist.");
         
-        var workoutExercise = _mapper.Map<WorkoutExercise>(workoutExerciseDto);
+        var workoutExercise = workoutExerciseDto.ToEntity();
         workoutExercise.WorkoutId = workoutId;
         workoutExercise.ExerciseId = workoutExerciseDto.ExerciseId;
 
@@ -93,13 +88,11 @@ public class WorkoutsController : ControllerBase
         
         workoutExercise.Exercise = exercise;
         
-        var result = _mapper.Map<WorkoutExerciseDto>(workoutExercise);
-
         return CreatedAtAction
             (
                 nameof(GetWorkoutExercises),
                 new { workoutId },
-                result
+                workoutExercise.ToDto()
             );
     }
 }

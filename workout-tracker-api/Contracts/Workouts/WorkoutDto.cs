@@ -2,11 +2,11 @@ using workout_tracker_api.Contracts.WorkoutExercises;
 
 namespace workout_tracker_api.Contracts.Workouts;
 
-public sealed class WorkoutDto
+public sealed record class WorkoutDto
 {
-    public Guid Id { get; init; }
-    public DateTime CreatedAt { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public string Description { get; init; } = string.Empty;
-    public IReadOnlyList<WorkoutExerciseDto> WorkoutExercises { get; init; } = Array.Empty<WorkoutExerciseDto>();
-}
+    public required Guid Id { get; init; }
+    public required DateTime CreatedAt { get; init; }
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required IReadOnlyList<WorkoutExerciseDto> WorkoutExercises { get; init; }
+};

@@ -1,9 +1,9 @@
 namespace workout_tracker_api.Contracts.WorkoutExercises;
 
-public sealed class CreateWorkoutExerciseDto
+public sealed record class CreateWorkoutExerciseDto
 {
-    public Guid ExerciseId { get; init; }
-    public int Sets { get; init; }
-    public int Reps { get; init; }
+    public required Guid ExerciseId { get; init; }
+    public required int Sets { get; init; }
+    public required int Reps { get; init; }
     public double? Weight { get; init; }
-}
+};

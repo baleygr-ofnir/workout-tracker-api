@@ -1,11 +1,11 @@
 using workout_tracker_api.Data.Entities;
 
-namespace workout_tracker_api.Contracts.Workouts;
+namespace workout_tracker_api.Contracts.Exercises;
 
-public sealed class ExerciseDto
+public sealed record class ExerciseDto
 {
-    public Guid Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public string Description { get; init; } = string.Empty;
-    public Category Category { get; init; }
-}
+    public required Guid Id { get; init; }
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required Category Category { get; init; }
+};
