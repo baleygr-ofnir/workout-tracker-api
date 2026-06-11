@@ -17,12 +17,41 @@ public class WorkoutContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
-        modelBuilder.Entity<Workout>()
-            .HasMany(w => w.WorkoutExercises)
-            .WithOne(we => we.Workout)
-            .HasForeignKey(we => we.WorkoutId)
-            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(u => u.Id);
+
+            entity.HasIndex(u => u.Username).IsUnique();
+            entity.HasIndex(u => u.Email).IsUnique();
+
+            entity.Property(u => u.Username)
+                .IsRequired()
+                .HasMaxLength(64);
+
+            entity.Property(u => u.Email)
+                .IsRequired()
+                .HasMaxLength(128);
+
+            entity.Property(u => u.PasswordHash)
+                .IsRequired()
+                .HasMaxLength(256);
+
+            entity.Property(u => u.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        modelBuilder.Entity<Workout>(entity =>
+        {
+            entity.HasOne(w => w.Creator)
+                .WithMany(u => u.Workouts)
+                .HasForeignKey(w => w.CreatorId);
+
+            entity.HasMany(w => w.WorkoutExercises)
+                .WithOne(we => we.Workout)
+                .HasForeignKey(we => we.WorkoutId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         modelBuilder.Entity<WorkoutExercise>()
             .HasOne(we => we.Exercise)
@@ -53,21 +82,5 @@ public class WorkoutContext : DbContext
                 Category = Category.HingePattern
             }
         );
-
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(u => u.Id);
-
-            entity.HasIndex(u => u.Username).IsUnique();
-            entity.HasIndex(u => u.Email).IsUnique();
-
-            entity.Property(u => u.Username)
-                .IsRequired()
-                .HasMaxLength(64);
-            entity.Property(u => u.Email)
-                .IsRequired()
-                .HasMaxLength(128);
-            entity.Property(u => u.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-        });
     }
 }
