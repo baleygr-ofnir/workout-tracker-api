@@ -7,6 +7,7 @@ using workout_tracker_api.Contracts.Workouts;
 using workout_tracker_api.Data.Entities;
 using workout_tracker_api.Data.Repositories;
 using workout_tracker_api.Mapping;
+using WorkoutResponse = workout_tracker_api.Contracts.WorkoutExercises.WorkoutResponse;
 
 namespace workout_tracker_api.Controllers;
 
@@ -26,20 +27,20 @@ public class WorkoutsController : ControllerBase
     
     // GET api/workouts/{workoutId}
     [HttpGet("{workoutId:guid}")]
-    public async Task<ActionResult<WorkoutDto>> GetWorkout(Guid workoutId, CancellationToken cancellationToken)
+    public async Task<ActionResult<Contracts.Workouts.WorkoutResponse>> GetWorkout(Guid workoutId, CancellationToken cancellationToken)
     {
         var workout = await _workouts.GetAsync(workoutId, cancellationToken); 
         if (workout == null) return NotFound();
         
-        return Ok(workout.ToDto());
+        return Ok(workout.ToContract());
     }
 
     // POST api/workouts
     [HttpPost]
-    public async Task<ActionResult<WorkoutDto>> CreateWorkout([FromBody] CreateWorkoutDto workoutDto,
+    public async Task<ActionResult<Contracts.Workouts.WorkoutResponse>> CreateWorkout([FromBody] WorkoutCreateRequest request,
         CancellationToken cancellationToken)
     {
-        var workout = workoutDto.ToEntity();
+        var workout = request.ToEntity();
         
         await _workouts.AddAsync(workout, cancellationToken);
         await _workouts.SaveChangesAsync(cancellationToken);
@@ -48,13 +49,13 @@ public class WorkoutsController : ControllerBase
             (
                 nameof(GetWorkout),
                 new { workoutId = workout.Id },
-                workout.ToDto()
+                workout.ToContract()
             );
     }
 
     // GET api/workouts/{workoutId}/exercises
     [HttpGet("{workoutId:guid}/exercises")]
-    public async Task<ActionResult<IEnumerable<WorkoutExerciseDto>>> GetWorkoutExercises(Guid workoutId,
+    public async Task<ActionResult<IEnumerable<WorkoutResponse>>> GetWorkoutExercises(Guid workoutId,
         CancellationToken cancellationToken)
     {
         var workoutExercises = await _workoutExercises
@@ -63,25 +64,25 @@ public class WorkoutsController : ControllerBase
                 we => we.WorkoutId == workoutId,
                 cancellationToken
             );
-        var workoutExerciseDtos = workoutExercises.Select(we => we.ToDto());
+        var workoutExerciseDtos = workoutExercises.Select(we => we.ToContract());
         
         return Ok(workoutExerciseDtos);
     }
 
     // POST api/workouts/{workoutId}/exercises
     [HttpPost("{workoutId:guid}/exercises")]
-    public async Task<ActionResult<WorkoutExerciseDto>> AddExercise(Guid workoutId, [FromBody] CreateWorkoutExerciseDto workoutExerciseDto,
+    public async Task<ActionResult<WorkoutResponse>> AddExercise(Guid workoutId, [FromBody] WorkoutExerciseCreateRequest request,
         CancellationToken cancellationToken)
     {
         var workout = await _workouts.GetAsync(workoutId, cancellationToken);
         if (workout == null) return NotFound();
         
-        var exercise = await _exercises.GetAsync(workoutExerciseDto.ExerciseId, cancellationToken);
+        var exercise = await _exercises.GetAsync(request.ExerciseId, cancellationToken);
         if (exercise == null) return BadRequest("Exercise does not exist.");
         
-        var workoutExercise = workoutExerciseDto.ToEntity();
+        var workoutExercise = request.ToEntity();
         workoutExercise.WorkoutId = workoutId;
-        workoutExercise.ExerciseId = workoutExerciseDto.ExerciseId;
+        workoutExercise.ExerciseId = request.ExerciseId;
 
         await _workoutExercises.AddAsync(workoutExercise, cancellationToken);
         await _workoutExercises.SaveChangesAsync(cancellationToken);
@@ -92,7 +93,7 @@ public class WorkoutsController : ControllerBase
             (
                 nameof(GetWorkoutExercises),
                 new { workoutId },
-                workoutExercise.ToDto()
+                workoutExercise.ToContract()
             );
     }
 }

@@ -8,7 +8,8 @@ public class WorkoutContext : DbContext
     public DbSet<Exercise> Exercises => Set<Exercise>(); 
     public DbSet<Workout> Workouts => Set<Workout>();
     public DbSet<WorkoutExercise> WorkoutExercises => Set<WorkoutExercise>();
-    
+    public DbSet<User> Users => Set<User>();
+
     public WorkoutContext(DbContextOptions<WorkoutContext> options) : base(options)
     {
     }
@@ -52,5 +53,21 @@ public class WorkoutContext : DbContext
                 Category = Category.HingePattern
             }
         );
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(u => u.Id);
+
+            entity.HasIndex(u => u.Username).IsUnique();
+            entity.HasIndex(u => u.Email).IsUnique();
+
+            entity.Property(u => u.Username)
+                .IsRequired()
+                .HasMaxLength(64);
+            entity.Property(u => u.Email)
+                .IsRequired()
+                .HasMaxLength(128);
+            entity.Property(u => u.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
     }
 }

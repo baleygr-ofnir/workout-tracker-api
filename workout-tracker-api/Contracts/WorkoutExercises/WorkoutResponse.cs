@@ -2,7 +2,7 @@ using workout_tracker_api.Data.Entities;
 
 namespace workout_tracker_api.Contracts.WorkoutExercises;
 
-public sealed record class WorkoutExerciseDto
+public sealed record WorkoutResponse
 {
     public required Guid Id { get; init; }
     public required Guid ExerciseId { get; init; }

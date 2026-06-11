@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using workout_tracker_api.Data;
 
@@ -10,9 +11,11 @@ using workout_tracker_api.Data;
 namespace workout_tracker_api.Migrations
 {
     [DbContext(typeof(WorkoutContext))]
-    partial class WorkoutContextModelSnapshot : ModelSnapshot
+    [Migration("20260611152804_AddUserEntity")]
+    partial class AddUserEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.8");
@@ -62,51 +65,6 @@ namespace workout_tracker_api.Migrations
                         });
                 });
 
-            modelBuilder.Entity("workout_tracker_api.Data.Entities.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("Users");
-                });
-
             modelBuilder.Entity("workout_tracker_api.Data.Entities.Workout", b =>
                 {
                     b.Property<Guid>("Id")
@@ -124,12 +82,7 @@ namespace workout_tracker_api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Workouts");
                 });
@@ -164,13 +117,6 @@ namespace workout_tracker_api.Migrations
                     b.ToTable("WorkoutExercises");
                 });
 
-            modelBuilder.Entity("workout_tracker_api.Data.Entities.Workout", b =>
-                {
-                    b.HasOne("workout_tracker_api.Data.Entities.User", null)
-                        .WithMany("Workouts")
-                        .HasForeignKey("UserId");
-                });
-
             modelBuilder.Entity("workout_tracker_api.Data.Entities.WorkoutExercise", b =>
                 {
                     b.HasOne("workout_tracker_api.Data.Entities.Exercise", "Exercise")
@@ -188,11 +134,6 @@ namespace workout_tracker_api.Migrations
                     b.Navigation("Exercise");
 
                     b.Navigation("Workout");
-                });
-
-            modelBuilder.Entity("workout_tracker_api.Data.Entities.User", b =>
-                {
-                    b.Navigation("Workouts");
                 });
 
             modelBuilder.Entity("workout_tracker_api.Data.Entities.Workout", b =>

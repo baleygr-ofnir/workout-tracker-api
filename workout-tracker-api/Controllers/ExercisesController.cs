@@ -19,27 +19,27 @@ public class ExercisesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ExerciseDto>>> GetExercises(Guid exerciseId, CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<ExerciseResponse>>> GetExercises(Guid exerciseId, CancellationToken cancellationToken)
     {
         var exercises = await _exercises.AllAsync(cancellationToken);
-        var exerciseDtos = exercises.Select(e => e.ToDto());
+        var exerciseDtos = exercises.Select(e => e.ToContract());
         
         return Ok(exerciseDtos);
     }
 
     [HttpGet("{exerciseId:guid}")]
-    public async Task<ActionResult<ExerciseDto>> GetExercise(Guid exerciseId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ExerciseResponse>> GetExercise(Guid exerciseId, CancellationToken cancellationToken)
     {
         var exercise = await _exercises.GetAsync(exerciseId, cancellationToken);
         if (exercise is null) return NotFound();
         
-        return Ok(exercise.ToDto());
+        return Ok(exercise.ToContract());
     }
 
     [HttpPost]
-    public async Task<ActionResult<ExerciseDto>> CreateExercise([FromBody] CreateExerciseDto exerciseDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<ExerciseResponse>> CreateExercise([FromBody] ExerciseCreateRequest request, CancellationToken cancellationToken)
     {
-        var exercise = exerciseDto.ToEntity();
+        var exercise = request.ToEntity();
 
         await _exercises.AddAsync(exercise, cancellationToken);
         await _exercises.SaveChangesAsync(cancellationToken);
@@ -48,7 +48,7 @@ public class ExercisesController : ControllerBase
             (
                 nameof(GetExercises),
                 new { id = exercise.Id},
-                exercise.ToDto()
+                exercise.ToContract()
             );
     }
 }

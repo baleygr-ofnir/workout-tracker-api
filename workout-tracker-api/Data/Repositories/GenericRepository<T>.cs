@@ -13,12 +13,19 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
         Context = context;
         DbSet = context.Set<T>();
     }
-    
+
+    public virtual async Task<T> AddAsync(T entity)
+    {
+        var added = await DbSet.AddAsync(entity);
+
+        return added.Entity;
+    }
+
     public virtual async Task<T?> GetAsync(Guid id, CancellationToken cancellationToken = default) => await DbSet.FindAsync([id], cancellationToken);
     
     public virtual async Task<IReadOnlyList<T>> AllAsync(CancellationToken cancellationToken = default) => await DbSet.AsNoTracking().ToListAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate,
+    public virtual async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate,
         CancellationToken cancellationToken = default) => await DbSet.Where(predicate).AsNoTracking().ToListAsync(cancellationToken);
 
     public IQueryable<T> AsQueryable() => DbSet.AsQueryable();
