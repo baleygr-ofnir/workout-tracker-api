@@ -11,6 +11,8 @@ using WorkoutResponse = workout_tracker_api.Contracts.WorkoutExercises.WorkoutRe
 
 namespace workout_tracker_api.Controllers;
 
+// TODO: DECOUPLE DATA LAYER AND ADD LOGIC LAYER
+
 [Route("api/[controller]")]
 [ApiController]
 public class WorkoutsController : ControllerBase
@@ -96,4 +98,6 @@ public class WorkoutsController : ControllerBase
                 workoutExercise.ToContract()
             );
     }
+
+    // TODO: ADD UPDATE AND DELETE ROUTES, LOOK INTO SCHEDULING/REPORTS
 }
